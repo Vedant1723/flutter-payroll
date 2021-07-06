@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:payroll/components/Auth/OtpPage.dart';
+import 'package:payroll/components/Auth/SignupPage.dart';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -98,7 +100,13 @@ class _LoginPageState extends State<LoginPage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18.0),
                         side: BorderSide(color: Colors.blue)),
-                    onPressed: () {},
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text("OTP Sent!"),
+                      ));
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => OtpPage()));
+                    },
                     splashColor: Colors.black,
                     child: Text("Login"),
                   )),
@@ -110,10 +118,10 @@ class _LoginPageState extends State<LoginPage> {
                   Text("Don't Have an accout? "),
                   TextButton(
                     onPressed: () {
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) => SignUpPage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SignUpPage()));
                     },
                     child: Text(
                       "Signup",
