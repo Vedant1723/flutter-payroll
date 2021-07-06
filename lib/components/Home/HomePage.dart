@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage> {
         },
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.grey,
+        
         items: [
           new BottomNavigationBarItem(
             icon: new Icon(Icons.home),

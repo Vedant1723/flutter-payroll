@@ -10,8 +10,12 @@ class Employees extends StatefulWidget {
 class _EmployeesState extends State<Employees> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text("This is Employees Page"),
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: new Icon(Icons.add),
+      ),
+      body: Center(child: Text("Employee")),
     );
   }
 }
