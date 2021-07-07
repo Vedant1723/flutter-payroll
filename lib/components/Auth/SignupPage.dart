@@ -32,7 +32,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Center(
-        child: SingleChildScrollView(
+        child: Expanded(
           child: Form(
             key: _key,
             child: Column(
@@ -101,7 +101,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 ListTile(
                   title: TextFormField(
-                    obscureText: !showPassword,
                     validator: (input) {
                       if (input == "") {
                         return 'Field is Empty';
@@ -155,6 +154,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 ListTile(
                   title: TextFormField(
+                    obscureText: !showPassword,
                     keyboardType: TextInputType.emailAddress,
                     enableSuggestions: true,
                     validator: (input) {

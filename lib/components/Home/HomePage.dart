@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:payroll/components/Employees/Employees.dart';
 import 'package:payroll/components/Home/Home.dart';
-import 'package:payroll/components/Profile/Profile.dart';
 import 'package:payroll/components/Transactions/Transactions.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,7 +16,6 @@ class _HomePageState extends State<HomePage> {
     Home(),
     Employees(),
     Transactions(),
-    Profile()
   ];
   @override
   Widget build(BuildContext context) {
@@ -32,7 +30,6 @@ class _HomePageState extends State<HomePage> {
         },
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.grey,
-        
         items: [
           new BottomNavigationBarItem(
             icon: new Icon(Icons.home),
@@ -46,10 +43,6 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.payment),
             title: Text('Transaction'),
           ),
-          new BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            title: Text('Profile'),
-          )
         ],
       ),
     );
