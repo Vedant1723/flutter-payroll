@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:payroll/components/Auth/OtpPage.dart';
 import 'package:payroll/components/Auth/SignupPage.dart';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -101,11 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(18.0),
                         side: BorderSide(color: Colors.blue)),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text("OTP Sent!"),
-                      ));
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => OtpPage()));
+                      sendOTP();
                     },
                     splashColor: Colors.black,
                     child: Text("Login"),
@@ -137,5 +134,34 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> sendOTP() async {
+    print(email + password);
+    if (_key.currentState!.validate()) {
+      _key.currentState!.save();
+
+      http.Response response = await http.post(
+        Uri.parse("http://192.168.29.210:5000/api/employer/login"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body:
+            jsonEncode(<String, String>{'email': email, 'password': password}),
+      );
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        print(data);
+        if (data['statusCode'] == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("OTP Sent!"),
+          ));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => OtpPage()));
+        }
+      } else {
+        print("Error");
+      }
+    }
   }
 }

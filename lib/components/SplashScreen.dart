@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:payroll/components/Auth/LoginPage.dart';
+import 'package:payroll/components/Home/HomePage.dart';
 import 'package:payroll/components/Onboarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
@@ -18,6 +19,8 @@ class _SplashScreenState extends State<SplashScreen> {
   SharedPreferences? prefs;
   String? onBoarded;
   bool isBoarded = false;
+  String? token;
+  bool isAuth = false;
 
   Future<bool> checkSession() async {
     await Future.delayed(Duration(milliseconds: 3000), () {});
@@ -26,8 +29,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void navigate() {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (BuildContext context) =>
-            !isBoarded ? Onboarding() : LoginPage()));
+        builder: (BuildContext context) => !isBoarded
+            ? Onboarding()
+            : isAuth
+                ? HomePage()
+                : LoginPage()));
   }
 
   @override
@@ -45,8 +51,12 @@ class _SplashScreenState extends State<SplashScreen> {
     prefs = await SharedPreferences.getInstance();
     setState(() {
       onBoarded = prefs?.getString('onBoarded');
+      token = prefs?.getString("token");
       if (onBoarded != null) {
         isBoarded = true;
+      }
+      if (token != null) {
+        isAuth = true;
       }
     });
   }
