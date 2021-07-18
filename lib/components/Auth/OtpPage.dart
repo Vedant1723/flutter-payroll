@@ -110,7 +110,7 @@ class _OtpPageState extends State<OtpPage> {
       _key.currentState!.save();
 
       http.Response response = await http.post(
-        Uri.parse("http://192.168.29.210:5000/api/employer/confirm-otp"),
+        Uri.parse("http://192.168.29.211:5000/api/employer/confirm-otp"),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

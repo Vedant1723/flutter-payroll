@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddEmployee extends StatefulWidget {
   const AddEmployee({Key? key}) : super(key: key);
@@ -9,14 +13,34 @@ class AddEmployee extends StatefulWidget {
 
 class _AddEmployeeState extends State<AddEmployee> {
   GlobalKey<FormState> _key = new GlobalKey();
+  SharedPreferences? prefs;
+
   List<String> locations = ['Per Hour', 'Monthly', 'Weekly', 'Per Unit'];
+  String? token;
+
   String email = "",
       password = "",
       businessName = "",
       name = "",
       businessType = "",
-      address = "";
-  int? phone;
+      address = "",
+      salaryType = "",
+      phone = "",
+      salary = "";
+
+  @override
+  void initState() {
+    super.initState();
+    initializePreference();
+  }
+
+  Future<void> initializePreference() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs?.getString("token");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,7 +115,7 @@ class _AddEmployeeState extends State<AddEmployee> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      onSaved: (input) => phone = input! as int,
+                      onSaved: (input) => phone = input!,
                     ),
                   ),
                   ListTile(
@@ -126,7 +150,7 @@ class _AddEmployeeState extends State<AddEmployee> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           icon: Icon(Icons.payment)),
-                      onSaved: (input) => email = input!,
+                      onSaved: (input) => salary = input!,
                     ),
                   ),
                   DropdownButton<String>(
@@ -139,7 +163,15 @@ class _AddEmployeeState extends State<AddEmployee> {
                       hint: Text("Please choose a Salary Type"),
                       onChanged: (newVal) {
                         // _selectedLocation = newVal;
-                        this.setState(() {});
+                        this.setState(() {
+                          if (newVal == "Per Hour") {
+                            salaryType = "perHour";
+                          }
+                          if (newVal == 'Monthly') {
+                            salaryType = "monthly";
+                          }
+                          print(salaryType);
+                        });
                       }),
                   Padding(padding: EdgeInsets.all(10.0)),
                   ButtonTheme(
@@ -151,10 +183,7 @@ class _AddEmployeeState extends State<AddEmployee> {
                             borderRadius: BorderRadius.circular(18.0),
                             side: BorderSide(color: Colors.blue)),
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text("Employee Added!"),
-                          ));
-                          Navigator.pop(context);
+                          createEmployee();
                         },
                         splashColor: Colors.black,
                         child: Text("Add Emplloyee"),
@@ -167,5 +196,35 @@ class _AddEmployeeState extends State<AddEmployee> {
         ),
       ),
     );
+  }
+
+  Future<void> createEmployee() async {
+    if (_key.currentState!.validate()) {
+      _key.currentState!.save();
+      http.Response response = await http.post(
+        Uri.parse("http://192.168.29.211:5000/api/employee/create-employee"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-api-key': token!
+        },
+        body: jsonEncode(<String, String>{
+          'name': name,
+          'email': email,
+          'address': address,
+          'phone': phone,
+          'salary': salary,
+          'salaryType': salaryType
+        }),
+      );
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(data['message']),
+        ));
+      } else {
+        print("Error");
+      }
+    }
   }
 }

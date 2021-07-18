@@ -1,10 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:payroll/components/Auth/LoginPage.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
@@ -23,6 +22,9 @@ class _HomeState extends State<Home> {
   List tasks = [];
   String taskID = "";
   bool isUpdate = false;
+  String businessName = "";
+  String ownerName = "";
+  int totalEmps = 0, regEmps = 0, absents = 0, presents = 0, transactions = 0;
 
   @override
   void initState() {
@@ -56,6 +58,8 @@ class _HomeState extends State<Home> {
             ),
             onPressed: () {
               // do something
+              prefs?.clear();
+
               Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (BuildContext context) => LoginPage()));
             },
@@ -76,7 +80,7 @@ class _HomeState extends State<Home> {
                   child: Center(
                     child: Container(
                       child: Text(
-                        'Business name here',
+                        businessName,
                         style: TextStyle(
                           fontSize: 25.0,
                           fontFamily: 'Pacifico',
@@ -93,7 +97,7 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "Owner Name here",
+                ownerName,
                 style: TextStyle(fontSize: 20),
               ),
             ],
@@ -102,23 +106,28 @@ class _HomeState extends State<Home> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text("Total Employees: 100", style: TextStyle(fontSize: 15)),
-              Text("Registered Employees: 100", style: TextStyle(fontSize: 15)),
+              Text("Total Employees: " + totalEmps.toString(),
+                  style: TextStyle(fontSize: 15)),
+              Text("Registered Employees: " + regEmps.toString(),
+                  style: TextStyle(fontSize: 15)),
             ],
           ),
           Padding(padding: EdgeInsets.all(3.0)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text("Absents: 100", style: TextStyle(fontSize: 15)),
-              Text("Presents: 100", style: TextStyle(fontSize: 15)),
+              Text("Absents: " + absents.toString(),
+                  style: TextStyle(fontSize: 15)),
+              Text("Presents: " + presents.toString(),
+                  style: TextStyle(fontSize: 15)),
             ],
           ),
           Padding(padding: EdgeInsets.all(3.0)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Transactions: 100", style: TextStyle(fontSize: 15)),
+              Text("Transactions: " + transactions.toString(),
+                  style: TextStyle(fontSize: 15)),
             ],
           ),
           Padding(padding: EdgeInsets.all(5.0)),
@@ -303,7 +312,7 @@ class _HomeState extends State<Home> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       http.Response response = await http.post(
-        Uri.parse("http://192.168.29.210:5000/api/employer/task/create-task"),
+        Uri.parse("http://192.168.29.211:5000/api/employer/task/create-task"),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'x-api-key': token!
@@ -330,7 +339,7 @@ class _HomeState extends State<Home> {
       _formKey.currentState!.save();
       http.Response response = await http.put(
         Uri.parse(
-            "http://192.168.29.210:5000/api/employer/task/update-task/" + id),
+            "http://192.168.29.211:5000/api/employer/task/update-task/" + id),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'x-api-key': token!
@@ -357,7 +366,7 @@ class _HomeState extends State<Home> {
 
   Future<void> getTasks() async {
     http.Response response = await http.get(
-      Uri.parse("http://192.168.29.210:5000/api/employer/tasks/all"),
+      Uri.parse("http://192.168.29.211:5000/api/employer/tasks/all"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'x-api-key': token!
@@ -368,7 +377,32 @@ class _HomeState extends State<Home> {
       setState(() {
         tasks = data;
       });
-      print(data);
+
+      getDetails();
+    } else {
+      print("Error");
+    }
+  }
+
+  Future<void> getDetails() async {
+    http.Response response = await http.get(
+      Uri.parse("http://192.168.29.211:5000/api/employer/details"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'x-api-key': token!
+      },
+    );
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      setState(() {
+        businessName = data['business']['businessName'];
+        ownerName = data['business']['ownerName'];
+        totalEmps = data['business']['noOfEmployess'];
+        regEmps = data['employeesCount'];
+        presents = data['presents'];
+        absents = data['absents'];
+        transactions = data['transactions'];
+      });
     } else {
       print("Error");
     }
@@ -379,7 +413,7 @@ class _HomeState extends State<Home> {
 
     http.Response response = await http.delete(
       Uri.parse(
-          "http://192.168.29.210:5000/api/employer/task/delete-task/" + id),
+          "http://192.168.29.211:5000/api/employer/task/delete-task/" + id),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'x-api-key': token!
